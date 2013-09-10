@@ -46,19 +46,23 @@ function initHeaderNotification(html)
 			$('.notifs_wrapper').hide();
 			$('#gamification_notif_number_wrapper').hide();
 			$('#gamification_notif_wrapper').show();
-			$('#gamification_progressbar').progressbar({
-				change: function() {
-			        if (current_level_percent)
-			        	$( ".gamification_progress-label" ).html( gamification_level+' '+current_level+' : '+$('#gamification_progressbar').progressbar( "value" ) + "%" );
-			        else
-			        	$( ".gamification_progress-label" ).html('');
-			      },
-	     	});
-			$('#gamification_progressbar').progressbar("value", current_level_percent );
+			if (typeof(admintab_gamification) != "undefined")
+			{
+				$('#gamification_progressbar').progressbar({
+					change: function() {
+				        if (current_level_percent)
+				        	$( ".gamification_progress-label" ).html( gamification_level+' '+current_level+' : '+$('#gamification_progressbar').progressbar( "value" ) + "%" );
+				        else
+				        	$( ".gamification_progress-label" ).html('');
+				      },
+		     	});
+				$('#gamification_progressbar').progressbar("value", current_level_percent );
+			}
 		}
 	});
+	if ($('.dropdown-toggle').length)
+		$('.dropdown-toggle').dropdown();
 }
-
 
 function disabledGamificationNotification()
 {
