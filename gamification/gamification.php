@@ -38,7 +38,7 @@ class Gamification extends Module
 	{
 		$this->name = 'gamification';
 		$this->tab = 'administration';
-		$this->version = '1.4.8';
+		$this->version = '1.5.1';
 		$this->author = 'PrestaShop';
 
 		parent::__construct();
@@ -139,7 +139,6 @@ class Gamification extends Module
 		if (method_exists($this->context->controller, 'addJquery'))
 		{
 			$this->context->controller->addJquery();
-			$this->context->controller->addJqueryUI('ui.progressbar');
 			$this->context->controller->addCss($this->_path.'views/css/gamification.css');
 			$this->context->controller->addJs($this->_path.'views/js/gamification.js');
 			$this->context->controller->addJqueryPlugin('fancybox');
@@ -173,7 +172,11 @@ class Gamification extends Module
 			'notification' => (int)Configuration::get('GF_NOTIFICATION'),
 			
 			));
-		return $this->display(__FILE__, 'notification.tpl');
+
+		if (version_compare(_PS_VERSION_, '1.5.5.0', '>'))
+			return $this->display(__FILE__, 'notification_bt.tpl');
+		else
+			return $this->display(__FILE__, 'notification.tpl');
 	}
 	
 	public function refreshDatas($iso_lang = null)
@@ -338,13 +341,17 @@ class Gamification extends Module
 					$adv = new Advice();
 					$adv->hydrate($advice_data, (int)$id_lang);
 					$adv->id_tab = (int)Tab::getIdFromClassName($advice->tab);
-	
+					
 					$adv->add();
 					foreach ($advice->display_conditions as $cond)
 						Db::getInstance()->insert('condition_advice', array('id_condition' => $cond_ids[$cond], 'id_advice' => $adv->id, 'display' => 1));
 						
 					foreach ($advice->hide_conditions as $cond)
-						Db::getInstance()->insert('condition_advice', array('id_condition' => $cond_ids[$cond], 'id_advice' => $adv->id, 'display' => 0));				
+						Db::getInstance()->insert('condition_advice', array('id_condition' => $cond_ids[$cond], 'id_advice' => $adv->id, 'display' => 0));
+						
+					if (isset($advice->tabs) && is_array($advice->tabs) && count($advice->tabs))
+						foreach ($advice->tabs as $tab)
+							Db::getInstance()->insert('tab_advice', array('id_tab' => (int)Tab::getIdFromClassName($tab), 'id_advice' => $adv->id));
 				}
 				unset($adv);
 			} catch (Exception $e) {
